@@ -1,7 +1,11 @@
 package mySelenium;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.Set;
 
 import org.junit.Before;
@@ -33,27 +37,56 @@ public class ApsrtcAutomation
 	}
 	
 	@Before   //@Test
-	public void launchApplication()
+	public void launchApplication() throws IOException
 	{
 		System.out.println("Launch APSRTC Application ");
-		cdriver.get("https://www.apsrtconline.in/");
+		//cdriver.get("https://www.apsrtconline.in/"); // Hardcoded
+		cdriver.get(readData("URL"));
 	}
 	
 	@Test
-	public void bookBusTicket() throws InterruptedException
+	public void readProperties() throws IOException
+	{
+		// 1. bring the file in to Java context as a java object , 2. read the data from the object 
+		
+		FileInputStream myfile = new FileInputStream("TestData//DevEnv.properties");	// news paper	
+		Properties prop = new Properties();  
+		prop.load(myfile); //handover the news paper to
+		String myval = prop.getProperty("FromCity");
+		System.out.println("data one :"  + myval);
+		System.out.println(prop.getProperty("ToCity"));
+		System.out.println(prop.getProperty("JDate"));
+		// Types of Exceptions in Java : Checked Exceptions / Compile Time    &  UnChecked / Run Time Exceptions
+		
+		// a/b -> divided by zero
+	}
+	
+	public String readData(String mykey) throws IOException
+	{		
+		FileInputStream myfile = new FileInputStream("TestData//DevEnv.properties");	// news paper	
+		Properties prop = new Properties();  
+		prop.load(myfile); //handover the news paper to
+		String myval = prop.getProperty(mykey);
+		return myval;
+	}
+	
+	@Test
+	public void bookBusTicket() throws InterruptedException, IOException
 	{
 		System.out.println("Test Case : Book Bus Ticket");
-		cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys("HYDERABAD"); //Hardcoded
+		//cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys("HYDERABAD"); //Hardcoded
+		cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(readData("FromCity"));
 		Actions actions = new Actions(cdriver);
 		//Thread.sleep(1000);
 		//actions.sendKeys(Keys.TAB).build().perform();
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
 		//keyboard and mouse operations can be performed using Actions class in Webdriver
-		cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys("GUNTUR");
+		cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(readData("ToCity"));
 		//Thread.sleep(1000);
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
 		cdriver.findElement(By.xpath("//input[@name='txtJourneyDate']")).click();
-		cdriver.findElement(By.xpath("//a[text()='29']")).click();
+		//cdriver.findElement(By.xpath("//a[text()='9']")).click();
+		cdriver.findElement(By.xpath("//a[text()='"+readData("JDate")+"']")).click();  // Dynamic XPATH
 		cdriver.findElement(By.xpath("//input[@name='searchBtn']")).click();
 	}
 	
