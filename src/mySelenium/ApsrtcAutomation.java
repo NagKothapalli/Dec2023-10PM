@@ -32,6 +32,7 @@ public class ApsrtcAutomation
 		actions = new Actions(cdriver);
 		cdriver.manage().window().maximize();
 		System.out.println("Constructor executed");
+		cdriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(25));
 		//sname = "Krishna";
 		//System.out.println("Local sname :"+ sname);
 	}
@@ -41,7 +42,28 @@ public class ApsrtcAutomation
 	{
 		System.out.println("Launch APSRTC Application ");
 		//cdriver.get("https://www.apsrtconline.in/"); // Hardcoded
-		cdriver.get(readData("URL"));
+		//cdriver.get(readData("URL"));
+	}
+	@Test
+	public void bookBusTicket() throws InterruptedException, IOException
+	{
+		System.out.println("Test Case : Book Bus Ticket");
+		//Thread.sleep(25000); //static wait / blind wait
+		cdriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(25));
+		//cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys("HYDERABAD"); //Hardcoded
+		cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(readData("FromCity"));
+		Actions actions = new Actions(cdriver);
+		//Thread.sleep(1000);
+		//actions.sendKeys(Keys.TAB).build().perform();
+		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+		//keyboard and mouse operations can be performed using Actions class in Webdriver
+		cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(readData("ToCity"));
+		//Thread.sleep(1000);
+		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+		cdriver.findElement(By.xpath("//input[@name='txtJourneyDate']")).click();
+		//cdriver.findElement(By.xpath("//a[text()='9']")).click();
+		cdriver.findElement(By.xpath("//a[text()='"+readData("JDate")+"']")).click();  // Dynamic XPATH
+		cdriver.findElement(By.xpath("//input[@name='searchBtn']")).click();
 	}
 	
 	@Test
@@ -71,24 +93,50 @@ public class ApsrtcAutomation
 	}
 	
 	@Test
-	public void bookBusTicket() throws InterruptedException, IOException
+	public void bookBusTicket_dataDriven() throws InterruptedException, IOException
 	{
 		System.out.println("Test Case : Book Bus Ticket");
-		//cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys("HYDERABAD"); //Hardcoded
-		cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(readData("FromCity"));
-		Actions actions = new Actions(cdriver);
-		//Thread.sleep(1000);
-		//actions.sendKeys(Keys.TAB).build().perform();
-		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-		//keyboard and mouse operations can be performed using Actions class in Webdriver
-		cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(readData("ToCity"));
-		//Thread.sleep(1000);
-		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-		cdriver.findElement(By.xpath("//input[@name='txtJourneyDate']")).click();
-		//cdriver.findElement(By.xpath("//a[text()='9']")).click();
-		cdriver.findElement(By.xpath("//a[text()='"+readData("JDate")+"']")).click();  // Dynamic XPATH
-		cdriver.findElement(By.xpath("//input[@name='searchBtn']")).click();
+		for(int i=1;i<=5;i++)
+		{
+			cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(readData("FromCity"));
+			Actions actions = new Actions(cdriver);
+			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+			cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(readData("ToCity"));
+			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+			cdriver.findElement(By.xpath("//input[@name='txtJourneyDate']")).click();
+			cdriver.findElement(By.xpath("//a[text()='"+readData("JDate")+"']")).click();  // Dynamic XPATH
+			cdriver.findElement(By.xpath("//input[@name='searchBtn']")).click();
+			Thread.sleep(2000);
+			cdriver.findElement(By.xpath("//a[text()='Home']")).click();
+		}
+		
 	}
+	
+	@Test
+	public void bookBusTicket_dataDriven2() throws InterruptedException, IOException
+	{
+		String fc = readData("FromCities");
+		String[] fcs = fc.split(",");
+		String[] tcs = readData("ToCities").split(",");
+		String[] jds = readData("JDates").split(",");
+		for(int i=0;i<fcs.length;i++)
+		{
+			System.out.println("Test Case : Book Bus Ticket");
+			cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(fcs[i]); // fcs[0] fcs[1]
+			Actions actions = new Actions(cdriver);
+			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+			cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(tcs[i]);
+			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
+			cdriver.findElement(By.xpath("//input[@name='txtJourneyDate']")).click();
+			cdriver.findElement(By.xpath("//a[text()='"+jds[i]+"']")).click();  // Dynamic XPATH
+			cdriver.findElement(By.xpath("//input[@name='searchBtn']")).click();
+			Thread.sleep(2000);
+			cdriver.findElement(By.xpath("//a[text()='Home']")).click();
+		}
+		
+	}
+	
+	
 	
 	@Test
 	public void handleWebAlert() throws InterruptedException
