@@ -23,9 +23,11 @@ public class ApsrtcAutomation
 	WebDriver cdriver; // null // instance variable
 	String sname = "Ram";
 	Actions actions;
+	ReadProperties rp;
+	ActionUtilities au;
 	public ApsrtcAutomation()
 	{
-		System.setProperty("webdriver.chrome.driver", "D:\\Softwares\\JarFiles\\chromedriver-win64-120-2\\chromedriver-win64\\chromedriver.exe");
+		//System.setProperty("webdriver.chrome.driver", "D:\\Softwares\\JarFiles\\chromedriver-win64-120-2\\chromedriver-win64\\chromedriver.exe");
 		//ChromeOptions coptions = new ChromeOptions();
 		//coptions.setBrowserVersion("Stable");
 		cdriver = new ChromeDriver(); // abcd12345
@@ -33,6 +35,8 @@ public class ApsrtcAutomation
 		cdriver.manage().window().maximize();
 		System.out.println("Constructor executed");
 		cdriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(25));
+		rp = new ReadProperties("TestData//QAEnv.properties");
+		au = new ActionUtilities(cdriver);
 		//sname = "Krishna";
 		//System.out.println("Local sname :"+ sname);
 	}
@@ -44,25 +48,35 @@ public class ApsrtcAutomation
 		//cdriver.get("https://www.apsrtconline.in/"); // Hardcoded
 		//cdriver.get(readData("URL"));
 	}
+	
+	public void allActions()
+	{
+		WebElement fcity = cdriver.findElement(By.xpath("//input[@name='source']"));
+		au.doubleClick(fcity);
+		au.rightClick(fcity);
+		au.clickEnter();
+		au.clickTab();
+	}
 	@Test
 	public void bookBusTicket() throws InterruptedException, IOException
 	{
+		//rp.readData("");
 		System.out.println("Test Case : Book Bus Ticket");
 		//Thread.sleep(25000); //static wait / blind wait
 		cdriver.manage().timeouts().implicitlyWait(Duration.ofSeconds(25));
 		//cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys("HYDERABAD"); //Hardcoded
-		cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(readData("FromCity"));
+		cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(rp.readData("FromCity"));
 		Actions actions = new Actions(cdriver);
 		//Thread.sleep(1000);
 		//actions.sendKeys(Keys.TAB).build().perform();
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
 		//keyboard and mouse operations can be performed using Actions class in Webdriver
-		cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(readData("ToCity"));
+		cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(rp.readData("ToCity"));
 		//Thread.sleep(1000);
 		actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
 		cdriver.findElement(By.xpath("//input[@name='txtJourneyDate']")).click();
 		//cdriver.findElement(By.xpath("//a[text()='9']")).click();
-		cdriver.findElement(By.xpath("//a[text()='"+readData("JDate")+"']")).click();  // Dynamic XPATH
+		cdriver.findElement(By.xpath("//a[text()='"+rp.readData("JDate")+"']")).click();  // Dynamic XPATH
 		cdriver.findElement(By.xpath("//input[@name='searchBtn']")).click();
 	}
 	
@@ -83,14 +97,7 @@ public class ApsrtcAutomation
 		// a/b -> divided by zero
 	}
 	
-	public String readData(String mykey) throws IOException
-	{		
-		FileInputStream myfile = new FileInputStream("TestData//DevEnv.properties");	// news paper	
-		Properties prop = new Properties();  
-		prop.load(myfile); //handover the news paper to
-		String myval = prop.getProperty(mykey);
-		return myval;
-	}
+	
 	
 	@Test
 	public void bookBusTicket_dataDriven() throws InterruptedException, IOException
@@ -98,13 +105,13 @@ public class ApsrtcAutomation
 		System.out.println("Test Case : Book Bus Ticket");
 		for(int i=1;i<=5;i++)
 		{
-			cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(readData("FromCity"));
+			cdriver.findElement(By.xpath("//input[@name='source']")).sendKeys(rp.readData("FromCity"));
 			Actions actions = new Actions(cdriver);
 			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
-			cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(readData("ToCity"));
+			cdriver.findElement(By.xpath("//input[@name='destination']")).sendKeys(rp.readData("ToCity"));
 			actions.pause(Duration.ofSeconds(1)).sendKeys(Keys.ENTER).build().perform();
 			cdriver.findElement(By.xpath("//input[@name='txtJourneyDate']")).click();
-			cdriver.findElement(By.xpath("//a[text()='"+readData("JDate")+"']")).click();  // Dynamic XPATH
+			cdriver.findElement(By.xpath("//a[text()='"+rp.readData("JDate")+"']")).click();  // Dynamic XPATH
 			cdriver.findElement(By.xpath("//input[@name='searchBtn']")).click();
 			Thread.sleep(2000);
 			cdriver.findElement(By.xpath("//a[text()='Home']")).click();
@@ -115,10 +122,10 @@ public class ApsrtcAutomation
 	@Test
 	public void bookBusTicket_dataDriven2() throws InterruptedException, IOException
 	{
-		String fc = readData("FromCities");
+		String fc = rp.readData("FromCities");
 		String[] fcs = fc.split(",");
-		String[] tcs = readData("ToCities").split(",");
-		String[] jds = readData("JDates").split(",");
+		String[] tcs = rp.readData("ToCities").split(",");
+		String[] jds = rp.readData("JDates").split(",");
 		for(int i=0;i<fcs.length;i++)
 		{
 			System.out.println("Test Case : Book Bus Ticket");
